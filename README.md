@@ -1,6 +1,6 @@
 # Description
 
-A todo.txt command line add-on for marking a task as done, and then
+A [todo.txt](https://github.com/ginatrapani/todo.txt-cli) command line add-on for marking a task as done, and then
 adding it again, adjusting due dates and deferral dates if desired.
 
 # Usage

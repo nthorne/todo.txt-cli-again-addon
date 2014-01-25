@@ -87,7 +87,7 @@ function adjust_due_date()
   then
     if [[ -z $DAYS ]]
     then
-      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d` \3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
     else
       if [[ "$DAYS" =~ ^\+[0-9]+ ]]
       then
@@ -95,7 +95,7 @@ function adjust_due_date()
       else
         ADJUST="$DAYS days"
       fi
-      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d` \3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d`\3/")
     fi
 
   fi
@@ -108,7 +108,7 @@ function adjust_deferral_date()
   then
     if [[ -z $DAYS ]]
     then
-      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d` \3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
     else
       if [[ "$DAYS" =~ ^\+[0-9]+ ]]
       then
@@ -116,7 +116,7 @@ function adjust_deferral_date()
       else
         ADJUST="$DAYS days"
       fi
-      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d` \3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d`\3/")
     fi
 
   fi

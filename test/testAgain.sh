@@ -1,20 +1,6 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 
 # vim: filetype=sh
-
-# Set IFS explicitly to space-tab-newline to avoid tampering
-IFS=' 	
-'
-
-# If found, use getconf to constructing a reasonable PATH, otherwise
-# we set it manually.
-if [[ -x /usr/bin/getconf ]]
-then
-  PATH=$(/usr/bin/getconf PATH)
-else
-  PATH=/bin:/usr/bin:/usr/local/bin
-fi
-
 
 TEST_NAME=`basename $0`
 TEST_LOCATION=$(cd `dirname $0`; pwd)

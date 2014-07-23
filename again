@@ -166,7 +166,7 @@ function adjust_deferral_date()
 
 function determine_date_version()
 {
-  date -v 1d 2>/dev/null
+  date -v 1d 1>/dev/null 2>/dev/null
   if [[ 0 -eq $? ]]
   then
     DATE_VERSION="BSD"

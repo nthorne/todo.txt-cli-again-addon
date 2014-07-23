@@ -101,7 +101,7 @@ function adjust_due_date()
           ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
         elif [[ $DATE_VERSION == "BSD" ]]
         then
-          ADJUST=`date -j -f %Y-%m-%d -v+$DAYSd $ORIGINAL +%Y-%m-%d`
+          ADJUST=`date -j -v"$DAYS"d -f %Y-%m-%d $ORIGINAL +%Y-%m-%d`
         else
           error "Unknown date implementation. Bailing out."
         fi
@@ -112,7 +112,7 @@ function adjust_due_date()
           ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
         elif [[ $DATE_VERSION == "BSD" ]]
         then
-          ADJUST=`date -j -v+$DAYSd +%Y-%m-%d`
+          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
         else
           error "Unknown date implementation. Bailing out."
         fi
@@ -142,7 +142,7 @@ function adjust_deferral_date()
           ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
         elif [[ $DATE_VERSION == "BSD" ]]
         then
-          ADJUST=`date -j -f %Y-%m-%d -v+$DAYSd $ORIGINAL +%Y-%m-%d`
+          ADJUST=`date -j -f %Y-%m-%d -v"$DAYS"d $ORIGINAL +%Y-%m-%d`
         else
           error "Unknown date implementation. Bailing out."
         fi
@@ -153,7 +153,7 @@ function adjust_deferral_date()
           ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
         elif [[ $DATE_VERSION == "BSD" ]]
         then
-          ADJUST=`date -j -v+$DAYSd +%Y-%m-%d`
+          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
         else
           error "Unknown date implementation. Bailing out."
         fi

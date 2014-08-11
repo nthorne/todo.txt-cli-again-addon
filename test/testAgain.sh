@@ -1,20 +1,6 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 
 # vim: filetype=sh
-
-# Set IFS explicitly to space-tab-newline to avoid tampering
-IFS=' 	
-'
-
-# If found, use getconf to constructing a reasonable PATH, otherwise
-# we set it manually.
-if [[ -x /usr/bin/getconf ]]
-then
-  PATH=$(/usr/bin/getconf PATH)
-else
-  PATH=/bin:/usr/bin:/usr/local/bin
-fi
-
 
 TEST_NAME=`basename $0`
 TEST_LOCATION=$(cd `dirname $0`; pwd)
@@ -155,16 +141,28 @@ function test_line_with_creation_date()
 function test_line_with_creation_date_and_due_date()
 {
   expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date +%Y-%m-%d`")
+
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 3
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '5 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '5 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -j -v+5d +%Y-%m-%d`")
+  fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 3 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`")
+  fi
+
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 3 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -177,12 +175,22 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
   $TEST_LOCATION/../again again 4
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '5 days' +%Y-%m-%d`_t:`date -d '5 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '5 days' +%Y-%m-%d`_t:`date -d '5 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`")
+  fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 4 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '2013-03-03 +10 days' +%Y-%m-%d`_t:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '2013-03-03 +10 days' +%Y-%m-%d`_t:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`")
+  fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 4 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -195,12 +203,22 @@ function test_line_with_creation_date_and_deferral_date()
   $TEST_LOCATION/../again again 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '5 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '5 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -v+5d +%Y-%m-%d`")
+  fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 5 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '2013-04-04 +10 days' +%Y-%m-%d`")
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '2013-04-04 +10 days' +%Y-%m-%d`")
+  else
+    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -j -v+10d -f %Y-%m-%d 2013-04-04 +%Y-%m-%d`")
+  fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 5 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -234,6 +252,19 @@ function test_nonexisting_line()
     echo "FAIL $TEST_FAILS: EXP EXIT(1) ACT EXIT($EXIT)"
   fi
 }
+
+function determine_date_version()
+{
+  date -v 1d 1>/dev/null 2>/dev/null
+  if [[ 0 -eq $? ]]
+  then
+    DATE_VERSION="BSD"
+  else
+    DATE_VERSION="GNU"
+  fi
+}
+
+determine_date_version
 
 test_line_without_creation_date
 test_line_with_creation_date

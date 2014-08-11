@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #Copyright (C) 2013 Niklas Thorne.
 #
@@ -18,6 +18,8 @@
 #along with again.  If not, see <http://www.gnu.org/licenses/>.
 
 readonly SED_DATE_RE="[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"
+
+DATE_VERSION=
 
 function usage()
 {
@@ -87,15 +89,35 @@ function adjust_due_date()
   then
     if [[ -z $DAYS ]]
     then
+      # DAYS not detailed; adjust to today.
       LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
     else
       if [[ "$DAYS" =~ ^\+[0-9]+ ]]
       then
-        ADJUST=$(echo "$LINE" | sed "s/.*due:\($SED_DATE_RE\).*/\1/")" $DAYS days"
+        # Adjust to DAYS from original values.
+        ORIGINAL=$(echo "$LINE" | sed "s/.*due:\($SED_DATE_RE\).*/\1/")
+        if [[ $DATE_VERSION == "GNU" ]]
+        then
+          ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
+        elif [[ $DATE_VERSION == "BSD" ]]
+        then
+          ADJUST=`date -j -v"$DAYS"d -f %Y-%m-%d $ORIGINAL +%Y-%m-%d`
+        else
+          error "Unknown date implementation. Bailing out."
+        fi
       else
-        ADJUST="$DAYS days"
+        # Adjust to DAYS from today.
+        if [[ $DATE_VERSION == "GNU" ]]
+        then
+          ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
+        elif [[ $DATE_VERSION == "BSD" ]]
+        then
+          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
+        else
+          error "Unknown date implementation. Bailing out."
+        fi
       fi
-      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d`\3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1$ADJUST\3/")
     fi
 
   fi
@@ -108,21 +130,56 @@ function adjust_deferral_date()
   then
     if [[ -z $DAYS ]]
     then
+      # Target days not detailed; adjust to today.
       LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
     else
       if [[ "$DAYS" =~ ^\+[0-9]+ ]]
       then
-        ADJUST=$(echo "$LINE" | sed "s/.*t:\($SED_DATE_RE\).*/\1/")" $DAYS days"
+        # Adjust to DAYS from original values.
+        ORIGINAL=$(echo "$LINE" | sed "s/.*t:\($SED_DATE_RE\).*/\1/")
+        if [[ $DATE_VERSION == "GNU" ]]
+        then
+          ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
+        elif [[ $DATE_VERSION == "BSD" ]]
+        then
+          ADJUST=`date -j -f %Y-%m-%d -v"$DAYS"d $ORIGINAL +%Y-%m-%d`
+        else
+          error "Unknown date implementation. Bailing out."
+        fi
       else
-        ADJUST="$DAYS days"
+        # Adjust to DAYS from today.
+        if [[ $DATE_VERSION == "GNU" ]]
+        then
+          ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
+        elif [[ $DATE_VERSION == "BSD" ]]
+        then
+          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
+        else
+          error "Unknown date implementation. Bailing out."
+        fi
       fi
-      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date -d \"$ADJUST\" +%Y-%m-%d`\3/")
+      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1$ADJUST\3/")
     fi
 
   fi
 }
 
+function determine_date_version()
+{
+  date -v 1d 1>/dev/null 2>/dev/null
+  if [[ 0 -eq $? ]]
+  then
+    DATE_VERSION="BSD"
+  elif [[ $(date --version) =~ GNU ]]
+  then
+    DATE_VERSION="GNU"
+  else
+    error "Unknown date implementation. Bailing out."
+  fi
+}
+
 parse_options "$@"
+determine_date_version
 get_line
 adjust_creation_date
 adjust_due_date

@@ -18,13 +18,13 @@
 #along with again.  If not, see <http://www.gnu.org/licenses/>.
 
 readonly SED_DATE_RE="[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"
-
-DATE_VERSION=
+readonly BASH_DATE_RE="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+readonly DATE_FORMAT="%Y-%m-%d"
 
 function usage()
 {
   echo " again add-on:"
-  echo "   again N "
+  echo "   again N"
   echo "     mark N as complete and recreate with any due date set as today."
   echo "   again N DAYS"
   echo "     mark N as complete and recreate with any due date and deferral date"
@@ -61,6 +61,39 @@ function parse_options()
   DAYS=$1
 }
 
+# Determine which date implementation is installed on this machine
+function determine_date_version()
+{
+  date -v 1d 1>/dev/null 2>/dev/null
+
+  # BSD flavor accepts the -v (value) option without complaint
+  if [[ 0 -eq $? ]]
+  then
+    DATE_VERSION="BSD"
+
+  # GNU flavor says so in the --version output  
+  elif [[ $(date --version) =~ GNU ]]
+  then
+    DATE_VERSION="GNU"
+
+  # else not supported  
+  else
+    error "Unknown date implementation. Bailing out."
+
+  fi
+}
+
+# Set $TODAY to today's date
+function today()
+{
+  if [[ $DATE_VERSION == "BSD" || $DATE_VERSION == "GNU" ]]
+  then
+    TODAY=`date +$DATE_FORMAT`
+  else
+    error "Unknown date implementation. Bailing out."
+  fi
+}
+
 # Retrieve line number $ITEM from the file $TODO_FILE
 function get_line()
 {
@@ -70,120 +103,74 @@ function get_line()
   [ -z "$LINE" ] && error "$ITEM: no such line"
 }
 
-# Adjust the creation date of the item in $LINE to be todays date,
-# if any such date.
-function adjust_creation_date()
+# Adjust $ORIGINAL by $DAYS, store in $NEW_DATE
+function adjust_date()
 {
-  # Adjust the task creation date, if any; otherwise leave it blank..
-  #if [[ "$LINE" =~ "^(\([A-Z]\) )*[0-9]{4}-[0-9]{2}-[0-9]{2} .*" ]]
-  if [[ "$LINE" =~ ^(\([A-Z]\) )*[0-9]{4}-[0-9]{2}-[0-9]{2}.* ]]
+  if [[ $DATE_VERSION == "GNU" ]]
   then
-    LINE=$(echo "$LINE" | sed "s/^\(([A-Z]) \)*\($SED_DATE_RE \)*\(.*\)/\1`date +%Y-%m-%d` \3/")
-  fi
-}
-
-# Adjust any due date according of the task, according to $DAYS
-function adjust_due_date()
-{
-  if [[ "$LINE" =~ .*due:[0-9]{4}-[0-9]{2}-[0-9]{2}.* ]]
+    NEW_DATE=`date -d "$ORIGINAL $DAYS days" +$DATE_FORMAT`
+  elif [[ $DATE_VERSION == "BSD" ]]
   then
-    if [[ -z $DAYS ]]
-    then
-      # DAYS not detailed; adjust to today.
-      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
-    else
-      if [[ "$DAYS" =~ ^\+[0-9]+ ]]
-      then
-        # Adjust to DAYS from original values.
-        ORIGINAL=$(echo "$LINE" | sed "s/.*due:\($SED_DATE_RE\).*/\1/")
-        if [[ $DATE_VERSION == "GNU" ]]
-        then
-          ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
-        elif [[ $DATE_VERSION == "BSD" ]]
-        then
-          ADJUST=`date -j -v"$DAYS"d -f %Y-%m-%d $ORIGINAL +%Y-%m-%d`
-        else
-          error "Unknown date implementation. Bailing out."
-        fi
-      else
-        # Adjust to DAYS from today.
-        if [[ $DATE_VERSION == "GNU" ]]
-        then
-          ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
-        elif [[ $DATE_VERSION == "BSD" ]]
-        then
-          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
-        else
-          error "Unknown date implementation. Bailing out."
-        fi
-      fi
-      LINE=$(echo "$LINE" | sed "s/\(.*due:\)\($SED_DATE_RE\)\(.*\)/\1$ADJUST\3/")
-    fi
-
-  fi
-}
-
-# Adjust the deferal date of the task in $LINE, according to $DAYS
-function adjust_deferral_date()
-{
-  if [[ "$LINE" =~ .*t:[0-9]{4}-[0-9]{2}-[0-9]{2}.* ]]
-  then
-    if [[ -z $DAYS ]]
-    then
-      # Target days not detailed; adjust to today.
-      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1`date +%Y-%m-%d`\3/")
-    else
-      if [[ "$DAYS" =~ ^\+[0-9]+ ]]
-      then
-        # Adjust to DAYS from original values.
-        ORIGINAL=$(echo "$LINE" | sed "s/.*t:\($SED_DATE_RE\).*/\1/")
-        if [[ $DATE_VERSION == "GNU" ]]
-        then
-          ADJUST=`date -d "$ORIGINAL $DAYS days" +%Y-%m-%d`
-        elif [[ $DATE_VERSION == "BSD" ]]
-        then
-          ADJUST=`date -j -f %Y-%m-%d -v"$DAYS"d $ORIGINAL +%Y-%m-%d`
-        else
-          error "Unknown date implementation. Bailing out."
-        fi
-      else
-        # Adjust to DAYS from today.
-        if [[ $DATE_VERSION == "GNU" ]]
-        then
-          ADJUST=`date -d "$DAYS days" +%Y-%m-%d`
-        elif [[ $DATE_VERSION == "BSD" ]]
-        then
-          ADJUST=`date -j -v+"$DAYS"d +%Y-%m-%d`
-        else
-          error "Unknown date implementation. Bailing out."
-        fi
-      fi
-      LINE=$(echo "$LINE" | sed "s/\(.*t:\)\($SED_DATE_RE\)\(.*\)/\1$ADJUST\3/")
-    fi
-
-  fi
-}
-
-function determine_date_version()
-{
-  date -v 1d 1>/dev/null 2>/dev/null
-  if [[ 0 -eq $? ]]
-  then
-    DATE_VERSION="BSD"
-  elif [[ $(date --version) =~ GNU ]]
-  then
-    DATE_VERSION="GNU"
+    NEW_DATE=`date -j -v"$DAYS"d -f $DATE_FORMAT $ORIGINAL +$DATE_FORMAT`
   else
     error "Unknown date implementation. Bailing out."
   fi
 }
 
+# Replace any creation date of the item in $LINE to $TODAY
+function replace_creation_date()
+{
+  if [[ "$LINE" =~ ^(\([A-Z]\) )*$BASH_DATE_RE.* ]]
+  then
+    LINE=$(echo "$LINE" | sed "s/^\(([A-Z]) \)*\($SED_DATE_RE \)*\(.*\)/\1$TODAY \3/")
+  fi
+}
+
+# Replace any date with $TAG in $LINE by $DAYS
+function replace_tagged_date()
+{
+  if [[ "$LINE" =~ .*$TAG:$BASH_DATE_RE.* ]]
+  then
+    if [[ -z $DAYS ]]
+    then
+      # DAYS not detailed; adjust to today.
+      NEW_DATE=$TODAY
+    else
+      if [[ "$DAYS" =~ ^\+[0-9]+ ]]
+      then
+        # Adjust to DAYS from original values.
+        ORIGINAL=$(echo "$LINE" | sed "s/.*$TAG:\($SED_DATE_RE\).*/\1/")
+      else
+        # Adjust to DAYS from today.
+        ORIGINAL=$TODAY
+      fi
+      adjust_date
+    fi
+    LINE=$(echo "$LINE" | sed "s/\(.*$TAG:\)\($SED_DATE_RE\)\(.*\)/\1$NEW_DATE\3/")
+  fi
+}
+
+# Replace any due date (due:DATE) of the item in $LINE by $DAYS
+function replace_due_date()
+{
+  TAG=due
+  replace_tagged_date
+}
+
+# Replace any deferral date (t:DATE) of the task in $LINE by $DAYS
+function replace_deferral_date()
+{
+  TAG=t
+  replace_tagged_date
+}
+
 parse_options "$@"
 determine_date_version
+today
 get_line
-adjust_creation_date
-adjust_due_date
-adjust_deferral_date
+replace_creation_date
+replace_due_date
+replace_deferral_date
 
 if [[ "$LINE" != "" ]]
 then

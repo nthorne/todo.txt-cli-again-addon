@@ -226,19 +226,19 @@ function test_line_with_creation_date_and_deferral_date()
 
 function test_line_with_creation_date_and_prio()
 {
-  expected=("command_do_6" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 6
+  $TEST_LOCATION/../again again 8
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_6" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 6 5
+  $TEST_LOCATION/../again again 8 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_6" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 6 +10
+  $TEST_LOCATION/../again again 8 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -264,6 +264,29 @@ function determine_date_version()
   fi
 }
 
+function test_line_with_again_tag()
+{
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_6" "command_add_`date +%Y-%m-%d`_This_is_the_sixth_line_due:`date -d '5 days' +%Y-%m-%d`_t:`date -d '5 days' +%Y-%m-%d`_again:5")
+  else
+    expected=("command_do_6" "command_add_`date +%Y-%m-%d`_This_is_the_sixth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`_again:5")
+  fi
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $TEST_LOCATION/../again again 6
+  TEST_FAILS=$(($TEST_FAILS + $?))
+
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_7" "command_add_`date +%Y-%m-%d`_This_is_the_seventh_line_due:`date -d '2013-03-03 +10 days' +%Y-%m-%d`_t:`date -d '2013-02-02 +10 days' +%Y-%m-%d`_again:+10")
+  else
+    expected=("command_do_7" "command_add_`date +%Y-%m-%d`_This_is_the_seventh_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`_again:+10")
+  fi
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $TEST_LOCATION/../again again 7
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
 determine_date_version
 
 test_line_without_creation_date
@@ -273,6 +296,7 @@ test_line_with_creation_date_and_due_date_and_deferral_date
 test_line_with_creation_date_and_deferral_date
 test_line_with_creation_date_and_prio
 test_nonexisting_line
+test_line_with_again_tag
 
 [[ $TEST_FAILS -eq 0 ]] || error "Failures: $TEST_FAILS"
 echo "All tests passed.."

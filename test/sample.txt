@@ -3,4 +3,6 @@ This is the first line
 2013-02-02 This is the third line due:2013-02-02
 2013-03-03 This is the fourth line due:2013-03-03 t:2013-02-02
 2013-04-04 This is the fifth line t:2013-04-04
+2013-03-03 This is the sixth line due:2013-03-03 t:2013-02-02 again:5
+2013-03-03 This is the seventh line due:2013-03-03 t:2013-02-02 again:+10
 (A) 2013-01-01 This is the final line

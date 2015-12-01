@@ -226,17 +226,17 @@ function test_line_with_creation_date_and_deferral_date()
 
 function test_line_with_creation_date_and_prio()
 {
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 8
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 8 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $TEST_LOCATION/../again again 8 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -287,6 +287,33 @@ function test_line_with_again_tag()
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_day_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2015-08-22")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $TEST_LOCATION/../again again $TASK +7d
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+function test_month_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2015-11-15")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $TEST_LOCATION/../again again $TASK +3m
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+function test_year_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2027-08-15")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $TEST_LOCATION/../again again $TASK +12y
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
 determine_date_version
 
 test_line_without_creation_date
@@ -297,6 +324,9 @@ test_line_with_creation_date_and_deferral_date
 test_line_with_creation_date_and_prio
 test_nonexisting_line
 test_line_with_again_tag
+test_day_stepping
+test_month_stepping
+test_year_stepping
 
-[[ $TEST_FAILS -eq 0 ]] || error "Failures: $TEST_FAILS"
-echo "All tests passed.."
+[ $TEST_FAILS -eq 0 ] || error "Failures: $TEST_FAILS"
+echo "All tests passed."

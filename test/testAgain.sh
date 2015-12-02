@@ -125,17 +125,17 @@ function test_line_without_creation_date()
 
 function test_line_with_creation_date()
 {
-  expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
+  expected=("command_do_2" "command_add_`date +%F`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 2
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
+  expected=("command_do_2" "command_add_`date +%F`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 2 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
+  expected=("command_do_2" "command_add_`date +%F`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 2 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -143,7 +143,7 @@ function test_line_with_creation_date()
 
 function test_line_with_creation_date_and_due_date()
 {
-  expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date +%Y-%m-%d`")
+  expected=("command_do_3" "command_add_`date +%F`_This_is_the_third_line_due:`date +%F`")
 
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 3
@@ -151,9 +151,9 @@ function test_line_with_creation_date_and_due_date()
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '5 days' +%Y-%m-%d`")
+    expected=("command_do_3" "command_add_`date +%F`_This_is_the_third_line_due:`date -d '5 days' +%F`")
   else
-    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -j -v+5d +%Y-%m-%d`")
+    expected=("command_do_3" "command_add_`date +%F`_This_is_the_third_line_due:`date -j -v+5d +%F`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 3 5
@@ -161,9 +161,9 @@ function test_line_with_creation_date_and_due_date()
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+    expected=("command_do_3" "command_add_`date +%F`_This_is_the_third_line_due:`date -d '2013-02-02 +10 days' +%F`")
   else
-    expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`")
+    expected=("command_do_3" "command_add_`date +%F`_This_is_the_third_line_due:`date -j -v+10d -f %F 2013-02-02 +%F`")
   fi
 
   export TEST_EXPECT=`echo ${expected[@]}`
@@ -173,16 +173,16 @@ function test_line_with_creation_date_and_due_date()
 
 function test_line_with_creation_date_and_due_date_and_deferral_date()
 {
-  expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date +%Y-%m-%d`_t:`date +%Y-%m-%d`")
+  expected=("command_do_4" "command_add_`date +%F`_This_is_the_fourth_line_due:`date +%F`_t:`date +%F`")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 4
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '5 days' +%Y-%m-%d`_t:`date -d '5 days' +%Y-%m-%d`")
+    expected=("command_do_4" "command_add_`date +%F`_This_is_the_fourth_line_due:`date -d '5 days' +%F`_t:`date -d '5 days' +%F`")
   else
-    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`")
+    expected=("command_do_4" "command_add_`date +%F`_This_is_the_fourth_line_due:`date -j -v+5d +%F`_t:`date -j -v+5d +%F`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 4 5
@@ -190,9 +190,9 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -d '2013-03-03 +10 days' +%Y-%m-%d`_t:`date -d '2013-02-02 +10 days' +%Y-%m-%d`")
+    expected=("command_do_4" "command_add_`date +%F`_This_is_the_fourth_line_due:`date -d '2013-03-03 +10 days' +%F`_t:`date -d '2013-02-02 +10 days' +%F`")
   else
-    expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`")
+    expected=("command_do_4" "command_add_`date +%F`_This_is_the_fourth_line_due:`date -j -v+10d -f %F 2013-03-03 +%F`_t:`date -j -v+10d -f %F 2013-02-02 +%F`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 4 +10
@@ -201,16 +201,16 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
 
 function test_line_with_creation_date_and_deferral_date()
 {
-  expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date +%Y-%m-%d`")
+  expected=("command_do_5" "command_add_`date +%F`_This_is_the_fifth_line_t:`date +%F`")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '5 days' +%Y-%m-%d`")
+    expected=("command_do_5" "command_add_`date +%F`_This_is_the_fifth_line_t:`date -d '5 days' +%F`")
   else
-    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -v+5d +%Y-%m-%d`")
+    expected=("command_do_5" "command_add_`date +%F`_This_is_the_fifth_line_t:`date -v+5d +%F`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 5 5
@@ -218,9 +218,9 @@ function test_line_with_creation_date_and_deferral_date()
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -d '2013-04-04 +10 days' +%Y-%m-%d`")
+    expected=("command_do_5" "command_add_`date +%F`_This_is_the_fifth_line_t:`date -d '2013-04-04 +10 days' +%F`")
   else
-    expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -j -v+10d -f %Y-%m-%d 2013-04-04 +%Y-%m-%d`")
+    expected=("command_do_5" "command_add_`date +%F`_This_is_the_fifth_line_t:`date -j -v+10d -f %F 2013-04-04 +%F`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 5 +10
@@ -229,17 +229,17 @@ function test_line_with_creation_date_and_deferral_date()
 
 function test_line_with_creation_date_and_prio()
 {
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
+  expected=("command_do_8" "command_add_(A)_`date +%F`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 8
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
+  expected=("command_do_8" "command_add_(A)_`date +%F`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 8 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
+  expected=("command_do_8" "command_add_(A)_`date +%F`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 8 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
@@ -260,9 +260,9 @@ function test_line_with_again_tag()
 {
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_6" "command_add_`date +%Y-%m-%d`_This_is_the_sixth_line_due:`date -d '5 days' +%Y-%m-%d`_t:`date -d '5 days' +%Y-%m-%d`_again:5")
+    expected=("command_do_6" "command_add_`date +%F`_This_is_the_sixth_line_due:`date -d '5 days' +%F`_t:`date -d '5 days' +%F`_again:5")
   else
-    expected=("command_do_6" "command_add_`date +%Y-%m-%d`_This_is_the_sixth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`_again:5")
+    expected=("command_do_6" "command_add_`date +%F`_This_is_the_sixth_line_due:`date -j -v+5d +%F`_t:`date -j -v+5d +%F`_again:5")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 6
@@ -270,12 +270,21 @@ function test_line_with_again_tag()
 
   if [[ "GNU" == $DATE_VERSION ]]
   then
-    expected=("command_do_7" "command_add_`date +%Y-%m-%d`_This_is_the_seventh_line_due:`date -d '2013-03-03 +10 days' +%Y-%m-%d`_t:`date -d '2013-02-02 +10 days' +%Y-%m-%d`_again:+10")
+    expected=("command_do_7" "command_add_`date +%F`_This_is_the_seventh_line_due:`date -d '2013-03-03 +10 days' +%F`_t:`date -d '2013-02-02 +10 days' +%F`_again:+10")
   else
-    expected=("command_do_7" "command_add_`date +%Y-%m-%d`_This_is_the_seventh_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`_again:+10")
+    expected=("command_do_7" "command_add_`date +%F`_This_is_the_seventh_line_due:`date -j -v+10d -f %F 2013-03-03 +%F`_t:`date -j -v+10d -f %F 2013-02-02 +%F`_again:+10")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
   $AGAIN 7
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+function test_command_line_overrides_again_tag()
+{
+  TASK=6
+  expected=("command_do_6" "command_add_`date +%F`_This_is_the_sixth_line_due:2013-03-20_t:2013-02-19_again:5")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +17
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -318,6 +327,7 @@ test_line_with_creation_date_and_deferral_date
 test_line_with_creation_date_and_prio
 test_nonexisting_line
 test_line_with_again_tag
+test_command_line_overrides_again_tag
 test_day_stepping
 test_month_stepping
 test_year_stepping

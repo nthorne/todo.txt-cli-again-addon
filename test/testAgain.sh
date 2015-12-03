@@ -2,9 +2,10 @@
 
 # vim: filetype=sh
 
+TEST_FAILS=0
 TEST_NAME=`basename $0`
 TEST_LOCATION=$(cd `dirname $0`; pwd)
-
+source $TEST_LOCATION/../againHelpers.sh
 
 function usage()
 {
@@ -17,12 +18,6 @@ Where valid OPTIONS are:
   -h, --help  display usage
 
 Usage_Heredoc
-}
-
-function error()
-{
-  echo "Error: $@" >&2
-  exit 1
 }
 
 function parse_options()
@@ -53,6 +48,18 @@ function setup_environment()
   # we export to any subshells..
   export TODO_FULL_SH=validate_call
   export -f validate_call
+
+  # FreeBSD and NetBSD have mitigated the ShellShock vulnerability by requiring
+  # an extra argument when scripts wish to call functions exported in the
+  # environment. The GNU version of bash hasn't done that yet. So first try with
+  # the new option, and fallback on calling bash without it.
+  bash --import-functions -c exit 1>/dev/null 2>/dev/null
+  if [ 0 -eq $? ]
+  then
+    AGAIN="bash --import-functions $TEST_LOCATION/../again again"
+  else
+    AGAIN="bash $TEST_LOCATION/../again again"
+  fi
 }
 
 
@@ -97,26 +104,22 @@ function validate_call()
 }
 
 
-parse_options "$@"
-
-setup_environment
-
 # The test suite
 function test_line_without_creation_date()
 {
   expected=("command_do_1" "command_add_This_is_the_first_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 1
+  $AGAIN 1
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   expected=("command_do_1" "command_add_This_is_the_first_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 1 10
+  $AGAIN 1 10
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   expected=("command_do_1" "command_add_This_is_the_first_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 1 +10
+  $AGAIN 1 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -124,17 +127,17 @@ function test_line_with_creation_date()
 {
   expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 2
+  $AGAIN 2
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 2 5
+  $AGAIN 2 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   expected=("command_do_2" "command_add_`date +%Y-%m-%d`_This_is_the_second_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 2 +10
+  $AGAIN 2 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -143,7 +146,7 @@ function test_line_with_creation_date_and_due_date()
   expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date +%Y-%m-%d`")
 
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 3
+  $AGAIN 3
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -153,7 +156,7 @@ function test_line_with_creation_date_and_due_date()
     expected=("command_do_3" "command_add_`date +%Y-%m-%d`_This_is_the_third_line_due:`date -j -v+5d +%Y-%m-%d`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 3 5
+  $AGAIN 3 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -164,7 +167,7 @@ function test_line_with_creation_date_and_due_date()
   fi
 
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 3 +10
+  $AGAIN 3 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -172,7 +175,7 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
 {
   expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date +%Y-%m-%d`_t:`date +%Y-%m-%d`")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 4
+  $AGAIN 4
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -182,7 +185,7 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
     expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 4 5
+  $AGAIN 4 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -192,7 +195,7 @@ function test_line_with_creation_date_and_due_date_and_deferral_date()
     expected=("command_do_4" "command_add_`date +%Y-%m-%d`_This_is_the_fourth_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 4 +10
+  $AGAIN 4 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
@@ -200,7 +203,7 @@ function test_line_with_creation_date_and_deferral_date()
 {
   expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date +%Y-%m-%d`")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 5
+  $AGAIN 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -210,7 +213,7 @@ function test_line_with_creation_date_and_deferral_date()
     expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -v+5d +%Y-%m-%d`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 5 5
+  $AGAIN 5 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -220,47 +223,36 @@ function test_line_with_creation_date_and_deferral_date()
     expected=("command_do_5" "command_add_`date +%Y-%m-%d`_This_is_the_fifth_line_t:`date -j -v+10d -f %Y-%m-%d 2013-04-04 +%Y-%m-%d`")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 5 +10
+  $AGAIN 5 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
 function test_line_with_creation_date_and_prio()
 {
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 8
+  $AGAIN 8
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 8 5
+  $AGAIN 8 5
   TEST_FAILS=$(($TEST_FAILS + $?))
 
-  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_final_line")
+  expected=("command_do_8" "command_add_(A)_`date +%Y-%m-%d`_This_is_the_eighth_line")
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 8 +10
+  $AGAIN 8 +10
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
 function test_nonexisting_line()
 {
-  $TEST_LOCATION/../again again 42 2>/dev/null
+  $AGAIN 42 2>/dev/null
   EXIT=$?
   if [[ ! $EXIT -eq 1 ]]
   then
     TEST_FAILS=$((TEST_FAILS + 1))
     echo "FAIL $TEST_FAILS: EXP EXIT(1) ACT EXIT($EXIT)"
-  fi
-}
-
-function determine_date_version()
-{
-  date -v 1d 1>/dev/null 2>/dev/null
-  if [[ 0 -eq $? ]]
-  then
-    DATE_VERSION="BSD"
-  else
-    DATE_VERSION="GNU"
   fi
 }
 
@@ -273,7 +265,7 @@ function test_line_with_again_tag()
     expected=("command_do_6" "command_add_`date +%Y-%m-%d`_This_is_the_sixth_line_due:`date -j -v+5d +%Y-%m-%d`_t:`date -j -v+5d +%Y-%m-%d`_again:5")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 6
+  $AGAIN 6
   TEST_FAILS=$(($TEST_FAILS + $?))
 
   if [[ "GNU" == $DATE_VERSION ]]
@@ -283,10 +275,39 @@ function test_line_with_again_tag()
     expected=("command_do_7" "command_add_`date +%Y-%m-%d`_This_is_the_seventh_line_due:`date -j -v+10d -f %Y-%m-%d 2013-03-03 +%Y-%m-%d`_t:`date -j -v+10d -f %Y-%m-%d 2013-02-02 +%Y-%m-%d`_again:+10")
   fi
   export TEST_EXPECT=`echo ${expected[@]}`
-  $TEST_LOCATION/../again again 7
+  $AGAIN 7
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_day_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2015-08-22")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +7d
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+function test_month_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2015-11-15")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +3m
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+function test_year_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2027-08-15")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +12y
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
+parse_options "$@"
+setup_environment
 determine_date_version
 
 test_line_without_creation_date
@@ -297,6 +318,9 @@ test_line_with_creation_date_and_deferral_date
 test_line_with_creation_date_and_prio
 test_nonexisting_line
 test_line_with_again_tag
+test_day_stepping
+test_month_stepping
+test_year_stepping
 
-[[ $TEST_FAILS -eq 0 ]] || error "Failures: $TEST_FAILS"
-echo "All tests passed.."
+[ $TEST_FAILS -eq 0 ] || error "Failures: $TEST_FAILS"
+echo "All tests passed."

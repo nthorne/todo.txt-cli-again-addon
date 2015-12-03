@@ -17,30 +17,25 @@
 #You should have received a copy of the GNU General Public License
 #along with again.  If not, see <http://www.gnu.org/licenses/>.
 
+source `dirname $0`/againHelpers.sh
+
 readonly SED_DATE_RE="[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"
 readonly BASH_DATE_RE="[0-9]{4}-[0-9]{2}-[0-9]{2}"
-readonly DATE_FORMAT="%Y-%m-%d"
 readonly AGAIN_TAG="again"
 
 function usage()
 {
   echo " again add-on:"
   echo "   again N"
-  echo "     mark N as complete and recreate with any due date set as today."
-  echo "   again N DAYS"
-  echo "     mark N as complete and recreate with any due date and deferral date"
-  echo "     set as DAYS days from today."
-  echo "   again N +DAYS"
-  echo "     mark N as complete and recreate with any due date and deferral date"
-  echo "     set as DAYS days from their original values."
+  echo "     Mark N as complete and recreate with any due date set as today."
+  echo "   again N ADJUST"
+  echo "     Mark N as complete and recreate with any due date and deferral date"
+  echo "     set as ADJUST from _today_."
+  echo "   again N +ADJUST"
+  echo "     Mark N as complete and recreate with any due date and deferral date"
+  echo "     set as ADJUST from _their original values_."
   echo ""
   exit
-}
-
-function error()
-{
-  echo "error: $@" >&2
-  exit 1
 }
 
 function parse_options()
@@ -59,29 +54,7 @@ function parse_options()
   fi
 
   shift
-  DAYS=$1
-}
-
-# Determine which date implementation is installed on this machine
-function determine_date_version()
-{
-  date -v 1d 1>/dev/null 2>/dev/null
-
-  # BSD flavor accepts the -v (value) option without complaint
-  if [[ 0 -eq $? ]]
-  then
-    DATE_VERSION="BSD"
-
-  # GNU flavor says so in the --version output  
-  elif [[ $(date --version) =~ GNU ]]
-  then
-    DATE_VERSION="GNU"
-
-  # else not supported  
-  else
-    error "Unknown date implementation. Bailing out."
-
-  fi
+  ADJUST=$1
 }
 
 # Set $TODAY to today's date
@@ -104,26 +77,12 @@ function get_line()
   [ -z "$LINE" ] && error "$ITEM: no such line"
 }
 
-# Find $DAYS in the task
+# Find $ADJUST in the task
 function get_days_from_line()
 {
   if [[ $LINE == *" $AGAIN_TAG:"* ]]
   then
-	DAYS=`sed "s/.* $AGAIN_TAG:\([^ ]*\).*/\1/" <<< "$LINE"`
-  fi
-}
-
-# Adjust $ORIGINAL by $DAYS, store in $NEW_DATE
-function adjust_date()
-{
-  if [[ $DATE_VERSION == "GNU" ]]
-  then
-    NEW_DATE=`date -d "$ORIGINAL $DAYS days" +$DATE_FORMAT`
-  elif [[ $DATE_VERSION == "BSD" ]]
-  then
-    NEW_DATE=`date -j -v"$DAYS"d -f $DATE_FORMAT $ORIGINAL +$DATE_FORMAT`
-  else
-    error "Unknown date implementation. Bailing out."
+    ADJUST=`sed "s/.* $AGAIN_TAG:\([^ ]*\).*/\1/" <<< "$LINE"`
   fi
 }
 
@@ -136,22 +95,22 @@ function replace_creation_date()
   fi
 }
 
-# Replace any date with $TAG in $LINE by $DAYS
+# Replace any date with $TAG in $LINE by $ADJUST
 function replace_tagged_date()
 {
   if [[ "$LINE" =~ .*$TAG:$BASH_DATE_RE.* ]]
   then
-    if [[ -z $DAYS ]]
+    if [[ -z $ADJUST ]]
     then
-      # DAYS not detailed; adjust to today.
+      # ADJUST not detailed; adjust to today.
       NEW_DATE=$TODAY
     else
-      if [[ "$DAYS" =~ ^\+[0-9]+ ]]
+      if [[ "$ADJUST" =~ ^\+[0-9]+ ]]
       then
-        # Adjust to DAYS from original values.
+        # Adjust to ADJUST from original values.
         ORIGINAL=$(echo "$LINE" | sed "s/.*$TAG:\($SED_DATE_RE\).*/\1/")
       else
-        # Adjust to DAYS from today.
+        # Adjust to ADJUST from today.
         ORIGINAL=$TODAY
       fi
       adjust_date
@@ -160,14 +119,14 @@ function replace_tagged_date()
   fi
 }
 
-# Replace any due date (due:DATE) of the item in $LINE by $DAYS
+# Replace any due date (due:DATE) of the item in $LINE by $ADJUST
 function replace_due_date()
 {
   TAG=due
   replace_tagged_date
 }
 
-# Replace any deferral date (t:DATE) of the task in $LINE by $DAYS
+# Replace any deferral date (t:DATE) of the task in $LINE by $ADJUST
 function replace_deferral_date()
 {
   TAG=t
@@ -178,7 +137,7 @@ parse_options "$@"
 determine_date_version
 today
 get_line
-[ "$DAYS" == "" ] && get_days_from_line
+[ "$ADJUST" == "" ] && get_days_from_line
 replace_creation_date
 replace_due_date
 replace_deferral_date

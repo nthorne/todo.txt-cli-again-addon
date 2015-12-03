@@ -17,17 +17,21 @@
 #You should have received a copy of the GNU General Public License
 #along with again.  If not, see <http://www.gnu.org/licenses/>.
 
-readonly DATE_FORMAT="%Y-%m-%d"
+readonly DATE_FORMAT="%F" # %F == %Y-%m-%d for BSD and GNU
 
 # Adjust $ORIGINAL by $ADJUST, store in $NEW_DATE
 function adjust_date()
 {
-  ADJUST_NUM=`expr match "$ADJUST" '+\?\([0-9]\+\)'`
-  ADJUST_UNIT=`expr match "$ADJUST" '.*\([dmy]\)'`
+  ADJUST_NUM=`expr "$ADJUST" : '+*\([1-9][0-9]*\)'`
+  ADJUST_UNIT=`expr "$ADJUST" : '.*\([dmy]\)'`
+  if [ -z $ADJUST_UNIT ]
+  then
+    ADJUST_UNIT=d
+  fi
   if [ $DATE_VERSION == "GNU" ]
   then
     case $ADJUST_UNIT in
-      d|'')
+      d)
         _GNU_UNIT=days
         ;;
       m)
@@ -43,9 +47,9 @@ function adjust_date()
     # todo.txt again users to miss deadlines near the end of the month.
     #   $ date --version
     #   date (GNU coreutils) 6.10
-    #   $ date -d "2015-01-31 1 month" +%Y-%m-%d
+    #   $ date -d "2015-01-31 1 month" +%F
     #   2015-03-03      -- Yikes! Task probably due on 2015-02-28
-    #   $ date -d "2016-02-29 2 years" +%Y-%m-%d
+    #   $ date -d "2016-02-29 2 years" +%F
     #   2018-03-01      -- Yikes! Task probably due on 2018-02-28
     # We'll work around this problem with some additional logic.
     if [ $_GNU_UNIT == "days" ] || [ ${ORIGINAL:8:2} -le "28" ]
@@ -68,8 +72,20 @@ function adjust_date()
   elif [ $DATE_VERSION == "BSD" ]
   then
     # BSD date handles month and year addition near the end of the month
-    # correctly for todo.txt again users; no special cases necessary.
-    NEW_DATE=`date -j -v${ADJUST_NUM}${ADJUST_UNIT} -f $DATE_FORMAT $ORIGINAL +$DATE_FORMAT`
+    # better than GNU, but still not quite perfectly.
+    #   $ man date | tail -n 1
+    #   FreeBSD 10.2             May 7, 2015                FreeBSD 10.2
+    #   $ date -j -v+1y -f %F 2016-02-29 +%F
+    #   2017-03-01      -- Yikes! Task probably due on 2017-02-28
+    #   $ date -j -v-1m -v+1y -v+1m -f %F 2016-02-29 +%F
+    #   2017-02-28      -- That's more like it
+    # So for BSD, we'll treat year adjustments carefully.
+    if [ $ADJUST_UNIT != "y" ]
+    then
+      NEW_DATE=`date -j -v+${ADJUST_NUM}${ADJUST_UNIT} -f $DATE_FORMAT $ORIGINAL +$DATE_FORMAT`
+    else
+      NEW_DATE=`date -j -v-1m -v+${ADJUST_NUM}${ADJUST_UNIT} -v+1m -f $DATE_FORMAT $ORIGINAL +$DATE_FORMAT`
+    fi
   else
     error "Unknown date implementation. Bailing out."
   fi
@@ -102,7 +118,3 @@ function error()
   echo "error: $@" >&2
   exit 1
 }
-
-export -f adjust_date
-export -f determine_date_version
-export -f error

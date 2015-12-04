@@ -47,3 +47,8 @@ for further details, refer to LICENSE.
 This add-on is based on the
 [repeat](https://github.com/drobertadams/todo.txt-cli-addons/tree/master/repeat)
 add-on.
+
+Thanks to the following developers for contributing features and fixes:
+
+- jbrc (James Blair)
+

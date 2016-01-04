@@ -1,0 +1,4 @@
+install: true
+script:
+  - bash test/testAgain.sh
+  - bash test/unitTests.sh

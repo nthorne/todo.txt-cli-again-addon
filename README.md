@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nthorne/todo.txt-cli-again-addon.svg?branch=master)](https://travis-ci.org/nthorne/todo.txt-cli-again-addon)
+
 # Description
 
 A [todo.txt](https://github.com/ginatrapani/todo.txt-cli) command line add-on

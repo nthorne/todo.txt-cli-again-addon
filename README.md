@@ -140,4 +140,5 @@ add-on.
 Thanks to the following developers for contributing features and fixes:
 
 - jbrc (James Blair)
+- cpence (Charles Pence)
 

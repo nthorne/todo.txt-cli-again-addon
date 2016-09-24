@@ -51,10 +51,10 @@ line.
 
 The ADJUST argument has the following format:
 
-    (+)X(d|m|y)
+    (+)X(d|w|m|y)
 - + = adjust dates relative to current values instead of today's date (optional)
 - X = an integer indicating the magnitude of the adjustment (required)
-- d, m, or y = adjust dates by days, months, or years (optional, default is days if omitted)
+- d, w, m, or y = adjust dates by days, weeks, months, or years (optional, default is days if omitted)
 
 Note that dates near the end of the month will drift from 31 to 30 (in months
 with only 30 days) and eventually to 28 (if they are ever scheduled in February

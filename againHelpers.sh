@@ -23,7 +23,7 @@ readonly DATE_FORMAT="%F" # %F == %Y-%m-%d for BSD and GNU
 function adjust_date()
 {
   ADJUST_NUM=`expr "$ADJUST" : '+*\([1-9][0-9]*\)'`
-  ADJUST_UNIT=`expr "$ADJUST" : '.*\([dmy]\)'`
+  ADJUST_UNIT=`expr "$ADJUST" : '.*\([dwmy]\)'`
   if [ -z $ADJUST_UNIT ]
   then
     ADJUST_UNIT=d
@@ -33,6 +33,9 @@ function adjust_date()
     case $ADJUST_UNIT in
       d)
         _GNU_UNIT=days
+        ;;
+      w)
+        _GNU_UNIT=weeks
         ;;
       m)
         _GNU_UNIT=months

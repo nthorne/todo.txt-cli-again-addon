@@ -55,7 +55,7 @@ function adjust_date()
     #   $ date -d "2016-02-29 2 years" +%F
     #   2018-03-01      -- Yikes! Task probably due on 2018-02-28
     # We'll work around this problem with some additional logic.
-    if [ $_GNU_UNIT == "days" ] || [ ${ORIGINAL:8:2} -le "28" ]
+    if [ $_GNU_UNIT == "days" ] || [ $_GNU_UNIT == "weeks" ] || [ ${ORIGINAL:8:2} -le "28" ]
     then
       # No workaround if users are adjusting by days OR the day of the month
       # isn't in the danger zone.

@@ -297,6 +297,15 @@ function test_day_stepping()
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_week_stepping()
+{
+  TASK=9
+  expected=("command_do_$TASK" "command_add_Line_${TASK}_due:2015-09-05")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +3w
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
 function test_month_stepping()
 {
   TASK=9
@@ -329,6 +338,7 @@ test_nonexisting_line
 test_line_with_again_tag
 test_command_line_overrides_again_tag
 test_day_stepping
+test_week_stepping
 test_month_stepping
 test_year_stepping
 

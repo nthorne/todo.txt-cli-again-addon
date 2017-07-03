@@ -95,6 +95,14 @@ function replace_creation_date()
   fi
 }
 
+
+# Remove any creation date of the item in $LINE
+function remove_creation_date()
+{
+  LINE=$(echo "$LINE" | sed "s/^$SED_DATE_RE //g")
+}
+
+
 # Replace any date with $TAG in $LINE by $ADJUST
 function replace_tagged_date()
 {
@@ -138,7 +146,12 @@ determine_date_version
 today
 get_line
 [ "$ADJUST" == "" ] && get_days_from_line
-replace_creation_date
+if [[ "$TODOTXT_DATE_ON_ADD" != 1 ]]
+then
+  replace_creation_date
+else
+  remove_creation_date
+fi
 replace_due_date
 replace_deferral_date
 

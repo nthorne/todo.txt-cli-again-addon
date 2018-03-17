@@ -139,6 +139,7 @@ add-on.
 
 Thanks to the following developers for contributing features and fixes:
 
-- jbrc (James Blair)
+- ad1217 (Adam Goldsmith)
 - cpence (Charles Pence)
-
+- jbrc (James Blair)
+- juzim (Julian Zimmermann)

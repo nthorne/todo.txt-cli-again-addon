@@ -75,6 +75,13 @@ of a common year, i.e. not a leap year).
     $ todo.sh again 12 +31d
     12 dates on this task will drift due:2015-03-31  ; adjust by days to keep task on the last day of the month
 
+## Configuraion
+
+If the environment variable `TODO_NO_AGAIN_IF_NOT_TAGGED` is set, then again
+will only re-add tasks that have an again tag in them, making the again command
+a drop-in replacement for the `do` command for any tasks without the again tag.
+See Examples for usage.
+
 # Examples
 
 Here are some examples that demonstrate how the again add-on works.
@@ -95,6 +102,10 @@ Here are some examples that demonstrate how the again add-on works.
     TODO: 1 marked as done.
     7 learn something new
     TODO: 7 added.
+
+    $ TODO_NO_AGAIN_IF_NOT_TAGGED=1 todo.sh again 1
+    1 x 2015-11-12 learn something new
+    TODO: 1 marked as done.
 
     $ todo.sh again 2 14
     2 x 2015-11-12 change bathroom towels due:2015-11-15
@@ -121,6 +132,12 @@ Here are some examples that demonstrate how the again add-on works.
     TODO: 11 added.
 
     $ todo.sh again 6
+    6 x 2015-11-12 send flowers to Mom for her birthday due:2016-01-14 again:+1y
+    TODO: 6 marked as done.
+    12 send flowers to Mom for her birthday due:2017-01-14 again:+1y
+    TODO: 12 added.
+
+    $ TODO_NO_AGAIN_IF_NOT_TAGGED=1 todo.sh again 6
     6 x 2015-11-12 send flowers to Mom for her birthday due:2016-01-14 again:+1y
     TODO: 6 marked as done.
     12 send flowers to Mom for her birthday due:2017-01-14 again:+1y

@@ -324,6 +324,41 @@ function test_year_stepping()
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_again_as_do()
+{
+  # First, test setting the TODO_NO_AGAIN_IF_NOT_TAGGED flag; if this is done,
+  # line number one, which does not contain an again tag should not be added..
+  export TODO_NO_AGAIN_IF_NOT_TAGGED=1
+  TASK=1
+  expected=("command_do_$TASK")
+  TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +17
+  TEST_FAILS=$(($TEST_FAILS + $?))
+
+  # Then, we try running again on task number 6, which does have an again tag;
+  # this time, the task should be added..
+  TASK=6
+  expected=("command_do_6" "command_add_`date +%F`_This_is_the_sixth_line_due:2013-03-20_t:2013-02-19_again:5")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +17
+  TEST_FAILS=$(($TEST_FAILS + $?))
+  unset TODO_NO_AGAIN_IF_NOT_TAGGED
+
+  # .. and finally, we re-run both test cases with the flag unset; now, both
+  # of the tasks should be added..
+  TASK=1
+  expected=("command_do_$TASK" "command_add_This_is_the_first_line")
+  TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +17
+  TEST_FAILS=$(($TEST_FAILS + $?))
+
+  TASK=6
+  expected=("command_do_6" "command_add_`date +%F`_This_is_the_sixth_line_due:2013-03-20_t:2013-02-19_again:5")
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK +17
+  TEST_FAILS=$(($TEST_FAILS + $?))
+}
+
 parse_options "$@"
 setup_environment
 determine_date_version
@@ -341,6 +376,7 @@ test_day_stepping
 test_week_stepping
 test_month_stepping
 test_year_stepping
+test_again_as_do
 
 [ $TEST_FAILS -eq 0 ] || error "Failures: $TEST_FAILS"
 echo "All tests passed."

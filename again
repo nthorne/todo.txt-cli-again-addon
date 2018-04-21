@@ -99,7 +99,7 @@ function replace_creation_date()
 # Remove any creation date of the item in $LINE
 function remove_creation_date()
 {
-  LINE=$(echo "$LINE" | sed "s/^$SED_DATE_RE //g")
+  LINE=$(echo "$LINE" | sed "s/^\(([A-Z]) \)*$SED_DATE_RE /\1/g")
 }
 
 

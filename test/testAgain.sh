@@ -359,6 +359,22 @@ function test_again_as_do()
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_line_with_again_tag_todo_adds_date()
+{
+  # Make sure that we drop dates as expected if todo.sh adds them..
+  export TODOTXT_DATE_ON_ADD=1
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_10" "command_add_(A)_This_is_the_tenth_line_due:`date -d '2013-03-03 +10 days' +%F`_t:`date -d '2013-02-02 +10 days' +%F`_again:+10")
+  else
+    expected=("command_do_10" "command_add_(A)_This_is_the_tenth_line_due:`date -j -v+10d -f %F 2013-03-03 +%F`_t:`date -j -v+10d -f %F 2013-02-02 +%F`_again:+10")
+  fi
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN 10
+  TEST_FAILS=$(($TEST_FAILS + $?))
+  export TODOTXT_DATE_ON_ADD=
+}
+
 parse_options "$@"
 setup_environment
 determine_date_version
@@ -377,6 +393,7 @@ test_week_stepping
 test_month_stepping
 test_year_stepping
 test_again_as_do
+test_line_with_again_tag_todo_adds_date
 
 [ $TEST_FAILS -eq 0 ] || error "Failures: $TEST_FAILS"
 echo "All tests passed."

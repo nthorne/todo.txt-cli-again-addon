@@ -159,7 +159,7 @@ if [[ "$LINE" != "" ]]
 then
   "$TODO_FULL_SH" command do "$ITEM"
 
-  if [[ -z "$TODO_NO_AGAIN_IF_NOT_TAGGED" || "$LINE" =~ .*$AGAIN_TAG ]]
+  if [[ -z "$TODO_NO_AGAIN_IF_NOT_TAGGED" || "$LINE" =~ .*" $AGAIN_TAG:" ]]
   then
     "$TODO_FULL_SH" command add "$LINE"
   fi

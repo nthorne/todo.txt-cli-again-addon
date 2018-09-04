@@ -82,6 +82,9 @@ will only re-add tasks that have an again tag in them, making the again command
 a drop-in replacement for the `do` command for any tasks without the again tag.
 See Examples for usage.
 
+The environment variable `TODO_AGAIN_TAG` can be set to change the tag
+which is used for the adjustment interval if present.
+
 # Examples
 
 Here are some examples that demonstrate how the again add-on works.

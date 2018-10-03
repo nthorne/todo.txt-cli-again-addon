@@ -8,3 +8,4 @@ This is the first line
 (A) 2013-01-01 This is the eighth line
 Line 9 due:2015-08-15
 (A) 2013-03-03 This is the tenth line due:2013-03-03 t:2013-02-02 again:+10
+2013-03-03 This is the eleventh line due:2013-03-03 t:2013-02-02 repeat:+2

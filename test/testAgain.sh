@@ -288,6 +288,22 @@ function test_command_line_overrides_again_tag()
   TEST_FAILS=$(($TEST_FAILS + $?))
 }
 
+function test_environment_variable_overrides_again_tag()
+{
+  TASK=11
+  export TODO_AGAIN_TAG=repeat
+  if [[ "GNU" == $DATE_VERSION ]]
+  then
+    expected=("command_do_$TASK" "command_add_`date +%F`_This_is_the_eleventh_line_due:`date -d '2013-03-03 +2 days' +%F`_t:`date -d '2013-02-02 +2 days' +%F`_repeat:+2")
+  else
+    expected=("command_do_$TASK" "command_add_`date +%F`_This_is_the_eleventh_line_due:`date -j -v+2d -f %F 2013-03-03 +%F`_t:`date -j -v+2d -f %F 2013-02-02 +%F`_repeat:+2")
+  fi
+  export TEST_EXPECT=`echo ${expected[@]}`
+  $AGAIN $TASK
+  TEST_FAILS=$(($TEST_FAILS + $?))
+  unset TODO_AGAIN_TAG
+}
+
 function test_day_stepping()
 {
   TASK=9
@@ -388,6 +404,7 @@ test_line_with_creation_date_and_prio
 test_nonexisting_line
 test_line_with_again_tag
 test_command_line_overrides_again_tag
+test_environment_variable_overrides_again_tag
 test_day_stepping
 test_week_stepping
 test_month_stepping

@@ -23,11 +23,35 @@ readonly DATE_FORMAT="%F" # %F == %Y-%m-%d for BSD and GNU
 function adjust_date()
 {
   ADJUST_NUM=`expr "$ADJUST" : '+*\([1-9][0-9]*\)'`
-  ADJUST_UNIT=`expr "$ADJUST" : '.*\([dwmy]\)'`
+  ADJUST_UNIT=`expr "$ADJUST" : '.*\([dwmyb]\)'`
   if [ -z $ADJUST_UNIT ]
   then
     ADJUST_UNIT=d
   fi
+  case $ADJUST_UNIT in
+    b)
+      if [ $DATE_VERSION == "BSD" ]
+      then
+        START_DOW=`date -j -f $DATE_FORMAT $ORIGINAL +%u`
+      elif [ $DATE_VERSION == "GNU" ]
+      then
+        START_DOW=`date -d "$ORIGINAL" +%u`
+      fi
+      # To calculate weekdays we determine how many extra days to add for weekends
+      # If the starting day is Saturday or Sunday save a correction factor
+      FINAL_DOW_ADJ=$(( $START_DOW > 5 ? $START_DOW % 5 : 0 ))
+      # If it's the original date isn't a weekday start from the previous weekday (Friday)
+      START_DOW=$(( $START_DOW > 5 ? 5 : $START_DOW )) 
+      # Calculate how many weekends to include and add 2 days for each
+      WEEKS=$(( ($START_DOW + $ADJUST_NUM - 1) / 5 ))
+      ADJUST_NUM=$(( 2 * $WEEKS + $ADJUST_NUM ))
+      # Subtract the correction for Saturday and Sunday if there is one
+      ADJUST_NUM=$(( $ADJUST_NUM - $FINAL_DOW_ADJ ))
+      ADJUST_UNIT=d
+      ;;
+    *)
+  esac
+
   if [ $DATE_VERSION == "GNU" ]
   then
     case $ADJUST_UNIT in

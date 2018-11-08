@@ -163,4 +163,5 @@ Thanks to the following developers for contributing features and fixes:
 - cpence (Charles Pence)
 - jbrc (James Blair)
 - juzim (Julian Zimmermann)
+- munkee
 - tgdnt (Tiago Donato)

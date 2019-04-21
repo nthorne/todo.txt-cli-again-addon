@@ -166,3 +166,4 @@ Thanks to the following developers for contributing features and fixes:
 - munkee
 - tgdnt (Tiago Donato)
 - owenh000 (Owen Heisler)
+- adamschmalhofer (Adam Schmalhofer)

@@ -57,17 +57,6 @@ function parse_options()
   ADJUST=$1
 }
 
-# Set $TODAY to today's date
-function today()
-{
-  if [[ $DATE_VERSION == "BSD" || $DATE_VERSION == "GNU" ]]
-  then
-    TODAY=`date +$DATE_FORMAT`
-  else
-    error "Unknown date implementation. Bailing out."
-  fi
-}
-
 # Retrieve line number $ITEM from the file $TODO_FILE
 function get_line()
 {

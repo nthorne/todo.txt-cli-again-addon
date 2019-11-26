@@ -51,10 +51,10 @@ line.
 
 The ADJUST argument has the following format:
 
-    (+)X(d|w|m|y)
-- + = adjust dates relative to current values instead of today's date (optional)
+    (+)X(d|b|w|m|y)
+- \+ = adjust dates relative to current values instead of today's date (optional)
 - X = an integer indicating the magnitude of the adjustment (required)
-- d, w, m, or y = adjust dates by days, weeks, months, or years (optional, default is days if omitted)
+- d, b, w, m, or y = adjust dates by days, business days (Mon-Fri), weeks, months, or years (optional, default is days if omitted)
 
 Note that dates near the end of the month will drift from 31 to 30 (in months
 with only 30 days) and eventually to 28 (if they are ever scheduled in February
@@ -75,7 +75,7 @@ of a common year, i.e. not a leap year).
     $ todo.sh again 12 +31d
     12 dates on this task will drift due:2015-03-31  ; adjust by days to keep task on the last day of the month
 
-## Configuraion
+## Configuration
 
 If the environment variable `TODO_NO_AGAIN_IF_NOT_TAGGED` is set, then again
 will only re-add tasks that have an again tag in them, making the again command
@@ -163,4 +163,7 @@ Thanks to the following developers for contributing features and fixes:
 - cpence (Charles Pence)
 - jbrc (James Blair)
 - juzim (Julian Zimmermann)
+- munkee
 - tgdnt (Tiago Donato)
+- owenh000 (Owen Heisler)
+- adamschmalhofer (Adam Schmalhofer)

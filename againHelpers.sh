@@ -19,6 +19,17 @@
 
 readonly DATE_FORMAT="%F" # %F == %Y-%m-%d for BSD and GNU
 
+# Set $TODAY to today's date
+function today()
+{
+  if [[ $DATE_VERSION == "BSD" || $DATE_VERSION == "GNU" ]]
+  then
+    TODAY=`date +$DATE_FORMAT`
+  else
+    error "Unknown date implementation. Bailing out."
+  fi
+}
+
 # Adjust $ORIGINAL by $ADJUST, store in $NEW_DATE
 function adjust_date()
 {

@@ -52,8 +52,11 @@ line.
 In order to hide tasks whose threshold date are set to a future day, point the `TODO_TXT_FINAL_FILTER` environment variable to `againFilter.sh` in e.g. your `.bashrc`:
 
     # At an appropriate line in ~/.bashrc, assuming again is installed in ~/.todo.actions.d
-    TODO_TXT_FINAL_FILTER=${HOME}/.todo.actions.d/againFilter.sh
+    TODOTXT_FINAL_FILTER=${HOME}/.todo.actions.d/againFilter.sh
 
+or, alternatively, add the following to `~/.todo/config`:
+
+    export TODOTXT_FINAL_FILTER="${HOME}/.todo.actions.d/againFilter.sh"
 
 ## Adjustment Format
 

@@ -47,6 +47,17 @@ line.
     10 (A) Do important things due:2001-01-11 t:2001-01-11 again:+5
     TODO: 10 added.
 
+## Filter
+
+In order to hide tasks whose threshold date are set to a future day, point the `TODO_TXT_FINAL_FILTER` environment variable to `againFilter.sh` in e.g. your `.bashrc`:
+
+    # At an appropriate line in ~/.bashrc, assuming again is installed in ~/.todo.actions.d
+    TODOTXT_FINAL_FILTER=${HOME}/.todo.actions.d/againFilter.sh
+
+or, alternatively, add the following to `~/.todo/config`:
+
+    export TODOTXT_FINAL_FILTER="${HOME}/.todo.actions.d/againFilter.sh"
+
 ## Adjustment Format
 
 The ADJUST argument has the following format:
@@ -163,7 +174,7 @@ Thanks to the following developers for contributing features and fixes:
 - cpence (Charles Pence)
 - jbrc (James Blair)
 - juzim (Julian Zimmermann)
-- munkee
+- munkee (David Whitmarsh)
 - tgdnt (Tiago Donato)
 - owenh000 (Owen Heisler)
 - adamschmalhofer (Adam Schmalhofer)

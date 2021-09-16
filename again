@@ -25,15 +25,14 @@ readonly AGAIN_TAG="${TODO_AGAIN_TAG:-again}"
 
 function usage()
 {
-  echo " again add-on:"
-  echo "   again N"
-  echo "     Mark N as complete and recreate with any due date set as today."
-  echo "   again N ADJUST"
-  echo "     Mark N as complete and recreate with any due date and deferral date"
-  echo "     set as ADJUST from _today_."
-  echo "   again N +ADJUST"
-  echo "     Mark N as complete and recreate with any due date and deferral date"
-  echo "     set as ADJUST from _their original values_."
+  echo "    again N"
+  echo "      Mark N as complete and recreate with any due date set as today."
+  echo "    again N ADJUST"
+  echo "      Mark N as complete and recreate with any due date and deferral date"
+  echo "      set as ADJUST from _today_."
+  echo "    again N +ADJUST"
+  echo "      Mark N as complete and recreate with any due date and deferral date"
+  echo "      set as ADJUST from _their original values_."
   echo ""
   exit
 }

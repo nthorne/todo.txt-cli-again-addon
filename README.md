@@ -6,6 +6,27 @@ A [todo.txt](https://github.com/ginatrapani/todo.txt-cli) command line add-on
 for marking a task as done, and then adding it again, adjusting due dates and
 deferral dates if desired.
 
+# Installation
+
+This add-on can be installed by cloning the Git repository to your
+`$TODO_ACTIONS_DIR` (`$HOME/.todo.actions.d` by default) and renaming the
+created directory to `again/` (which must not already exist).
+
+```console
+$ cd ~/.todo.actions.d/
+$ git clone git@github.com:nthorne/todo.txt-cli-again-addon.git
+$ mv todo.txt-cli-again-addon again
+```
+
+To use again as a drop-in replacement for the *do* action, just add a symlink
+for it. The `TODO_NO_AGAIN_IF_NOT_TAGGED` environment variable will also need
+to be set; see [Configuration](#Configuration) below.
+
+```console
+$ cd ~/.todo.actions.d/
+$ ln -s again/again do
+```
+
 # Usage
 
     $ todo.sh again N
